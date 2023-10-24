@@ -1,0 +1,84 @@
+---
+title: "Grade Analysis Lab"
+author: "Alexandre Piquet"
+format: html
+editor: visual
+---
+
+```{r}
+here::i_am("r-101-grade-analysis.Rproj")
+library(here)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(knitr)
+```
+
+## Question 1
+
+```{r}
+grades<- read.csv(here("grades.csv"))
+```
+
+## Question 2
+
+```{r}
+data_question_2 <- grades|>
+  summarise(
+    minimum_grade = min(Exam, na.rm = TRUE),
+    maximum_grade = max(Exam, na.rm = TRUE),
+    median_grade = median(Exam, na.rm = TRUE),
+    mean_grade = mean(Exam, na.rm = TRUE))
+
+kable(data_question_2, caption = "Several stats about the Exam dataset")
+```
+
+## Question 3
+
+```{r}
+missing_students <- sum(is.na(grades$Exam))
+```
+
+ The number of students who did not take the final exam is `r missing_students`
+
+## Question 4
+
+```{r}
+theme_set(theme_bw())
+ggplot(grades, aes(x=Exam))+
+  geom_histogram(fill="red")
+```
+
+## Question 5
+
+```{r}
+number_of_students <- grades|>
+  group_by(Group)|>
+  summarise(`Number of students by group` = n())
+
+kable(number_of_students, caption="Number of Students by group category")
+```
+
+## Question 6
+
+```{r}
+ggplot(number_of_students, aes(x=Group, y=`Number of students by group`))+
+  geom_point(color="red")
+```
+
+## Question 7
+
+```{r}
+ggplot(grades, aes(x = Group, y = Exam)) +
+  geom_violin(fill = "pink", color = "red", alpha = 0.7) +
+  labs(title = "Distribution of the grades at the Exam conditioned by the group")
+
+ggplot(grades, aes(x = Exam)) +
+  geom_bar(fill = "pink", color = "red") +
+  labs(title = "Distribution of the grades at the Exam conditioned by the group") +
+  facet_wrap(~Group)+
+  ylab("Number of students")
+```
+
+
+
