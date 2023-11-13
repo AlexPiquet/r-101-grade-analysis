@@ -39,7 +39,7 @@ kable(data_question_2, caption = "Several stats about the Exam dataset")
 missing_students <- sum(is.na(grades$Exam))
 ```
 
- The number of students who did not take the final exam is `r missing_students`
+The number of students who did not take the final exam is `r missing_students`
 
 ## Question 4
 
@@ -80,5 +80,115 @@ ggplot(grades, aes(x = Exam)) +
   ylab("Number of students")
 ```
 
+## Question 8
+
+```{r}
+data_question_8 <- grades |>
+  group_by(Group)|>
+  summarise(Missed_Exam = sum(is.na(Exam)))
+```
+
+## Question 9
+
+```{r}
+ggplot(data_question_8,aes(x=Group, y=Missed_Exam))+
+  geom_col(fill="yellow")+
+  ylab("Number of People who missed an Exam")
+```
+
+## Question 10
+
+```{r}
+new_data_frame <- grades|>
+  pivot_longer(
+    cols = starts_with("Exam")|starts_with("MCQ_")|starts_with("Online"),
+    names_to="names",
+    values_to ="value")
+```
+
+## Question 11
+
+```{r}
+data_question_11 <- new_data_frame|>
+  group_by(Id)|>
+  summarise(number_missing_grades = sum(is.na(value)))
+```
+
+## Question 12
+
+```{r}
+ggplot(data_question_11,aes(x=number_missing_grades))+
+  geom_bar(fill="blue")+
+  ylab("Number of students")+
+  xlab("Number of missing grades")
+```
+
+## Question 13
+
+```{r}
+data_question_13 <- new_data_frame |>
+  group_by(Group)|>
+  summarise(Missed_Exam = sum(is.na(value)))
+```
+
+## Question 14
+
+```{r}
+data_question_14 <- new_data_frame|>
+  group_by(Id)|>
+  filter(grepl("Online", names))|>
+  summarise(Number_of_Missing_Grades = sum(is.na(value)))
+```
+
+## Question 15
+
+```{r}
+data_question_15 <- grades |>
+  rowwise() |>
+  mutate(Number_of_Missing_Grades = sum(c_across(starts_with("Online")),na.rm = TRUE))|>
+  select(Id, Group, Exam, Number_of_Missing_Grades)
+
+ggplot(data_question_15, aes(x = Exam, fill = as.factor(Number_of_Missing_Grades))) +
+  geom_boxplot()+
+  facet_wrap(~ Group)
+```
+## Question 16
+
+```{r}
+data_question_16 <- grades|>
+  pivot_longer(cols = starts_with("MCQ"), names_to = "MCQ", values_to = "Grade")|>
+  group_by(Id)|>
+  summarise(Missed = any(is.na(Grade)))|>
+  mutate(Missed = ifelse(Missed, "TRUE", "FALSE"))
+
+kable(data_question_16)
+```
+
+## Question 17
+
+```{r}
+data_question_17 <- grades|>
+  group_by(Group)|>
+  select(Id, Group,starts_with("MCQ"))|>
+  summarise(Person_who_missed = sum(rowSums(across(starts_with("MCQ"), ~is.na(.))) > 0, na.rm = TRUE))
+
+missed_percentage_table <- data_question_17|>
+  mutate(Percentage_person_who_missed = (Person_who_missed / sum(Person_who_missed, na.rm = TRUE)) * 100)
+
+kable(missed_percentage_table)
+```
+
+## Question 18
+
+```{r}
+average_grade_table <- grades |>
+  group_by(Group) |>
+  summarise(Average_grade_per_group = mean(Exam, na.rm = TRUE))
+
+data_question_18 <- inner_join(missed_percentage_table, average_grade_table, by = "Group")
+
+ggplot(data_question_18, aes(x = Percentage_person_who_missed, y = Average_grade_per_group, color = Group)) +
+  geom_point()
+```
 
 
